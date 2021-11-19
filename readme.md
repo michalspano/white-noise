@@ -65,7 +65,7 @@ $ ./wnoise <width> <height> -h
 ![live_demo][DEMO]
 
 ## Development
-__Develop__ branch with beta features: [link](develop) (__warning__: might include bugs, use stable version under __main__ branch).
+__Develop__ branch with beta features: [link][develop] (__warning__: might include bugs, use stable version under __main__ branch).
 
 [LINK1]: https://en.wikipedia.org/wiki/White_noise
 [LINK2]: https://en.wikipedia.org/wiki/Netpbm
