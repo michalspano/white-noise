@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
 
 const (
 	// Number of command-line arguments
-	maxArgumentCount int = 4
+	maxArgumentCount int = 5
 	// Gray scale limit
 	maxGrayScale int = 15
 	// ANSI escape colors
@@ -33,47 +34,74 @@ var defaultOutPath = "out/out.pgm"
 
 // Main function
 func main() {
+	// Initial status message
 	cliStatus("White Noise Generator Initialised!")
 	args := getArgs()
 
-	// Check if the number of arguments is valid
-	// Size: <2;4>
-	if len(args) > maxArgumentCount || len(args) < maxArgumentCount - 2 {
+	// Default value to convert to PNG -> false
+	var toConvertToPng = false
+
+	// Store number of command-line arguments
+	argc := len(args)
+
+	// Default case
+	if argc < 2 || argc > maxArgumentCount {
 		warnUsage("usage")
-    }
-	// Detect size 4 -> `-d` flag, to change default output path
-	if len(args) == maxArgumentCount {
-		// Detect if any of the arguments is '-d'
-		for i := range args {
-			if args[i] == "-d" {
-				newPath := args[i + 1]
-				if checkFileExtension(newPath) {
-					updatePath(args[i + 1])
-				} else {
-					warnUsage("extension")
-				}
-				break
-			}
-		}
-	}
-	// Detect 3 command-line arguments
-	if len(args) == maxArgumentCount - 1 {
-		// Detect `-h` flag
-		if args[len(args) - 1] == "-h" {
+    } else if argc == 3 {
+		// Width, height, single flag
+		flag := args[len(args) - 1]
+		// Help flag
+		if flag == "-h" {
 			warnUsage("help")
+			// Png converter flag
+		} else if flag == "-png" {
+			toConvertToPng = true
+			// Update default output path
+			defaultOutPath = "out/out.png"
 		} else {
 			warnUsage("flag")
 		}
-	}
-
+	} else if argc == 4 {
+		checkRelocateFlags(args, EXTENSION)
+	} else if argc == maxArgumentCount {
+        checkRelocateFlags(args, "png")
+		for i := range args {
+			if args[i] == "-png" {
+				// Convert to png
+				toConvertToPng = true
+				break
+			}
+		}
+    }
 	// Write corresponding headers and generate scene
 	width, height := outputParameters(args)
 	writeHeader(width, height)
 	generateWhiteNoise(width, height)
 
+	// Convert to PNG (if required)
+	if toConvertToPng {
+        convertToPng(defaultOutPath, "png")
+    }
+
 	// End status
 	cliStatus("Generating white noise...done!")
 	os.Exit(0)
+}
+
+// Function to check command-line flags
+func checkRelocateFlags(args []string, ext string) {
+    // Check flags
+    for i := range args {
+		if args[i] == "-d" {
+            newPath := args[i + 1]
+            if checkFileExtension(newPath, ext) {
+                updatePath(newPath)
+				break
+            } else {
+                warnUsage("extension")
+            }
+		}
+    }
 }
 
 // Get command line arguments
@@ -93,13 +121,15 @@ func warnUsage(key string) {
 	} else if key == "size" {
 		ERR = "Image size must be greater than 0."
 	} else if key == "extension" {
-		ERR = "File extension must be `.pgm`."
+		ERR = "Invalid file extension."
 	} else if key == "help" {
 		fmt.Printf("%sDefault usage: ./wnoise <width> <height>\n" +
 			"Optional usage: ./wnoise <width> <height> | `-d` <output_path>\n" +
 			"- to change default output directory `out/out.pgm`%s\n", YELLOW, RESET)
 	} else if key == "flag" {
 		ERR = "Unsupported flag"
+	} else if key == "script" {
+		ERR = "Script error detected."
 	}
 	fmt.Printf("%s%s%s\n", RED, ERR, RESET)
 	os.Exit(1)
@@ -205,7 +235,7 @@ func updatePath(newPath string) {
 }
 
 // Check correct file extension
-func checkFileExtension(newPath string) bool {
+func checkFileExtension(newPath string, extension string) bool {
     // Split the path
     fullSplitPath := strings.Split(newPath, "/")
     // Get the last element
@@ -216,10 +246,21 @@ func checkFileExtension(newPath string) bool {
     lastElement = splitLastElement[len(splitLastElement)-1]
 
     // Check if the last element is .pgm
-    if lastElement == EXTENSION {
+    if lastElement == extension {
         return true
     }
     return false
+}
+
+// Function to transform .pgm to .png
+// Using a prebuild `Python3` script
+func convertToPng(inputPath string, outputPath string) {
+	cliStatus("Converting to png...")
+	// Execute the script
+	err := exec.Command("test/png-parse.py").Run()
+	if err != nil {
+		return 
+	}
 }
 
 // Custom CLI status formatted message
