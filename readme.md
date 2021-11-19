@@ -71,3 +71,4 @@ __Develop__ branch with beta features: [link](develop) (__warning__: might inclu
 [LINK2]: https://en.wikipedia.org/wiki/Netpbm
 [DOWNLOAD]: https://github.com/michalspano/white-noise/archive/refs/heads/main.zip
 [DEMO]: docs/demo.gif
+[develop]: https://github.com/michalspano/white-noise/tree/develop
