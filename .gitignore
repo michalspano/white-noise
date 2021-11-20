@@ -16,3 +16,6 @@
 #
 # Binaries
 *.DS_Store
+
+# ByteCode comp
+*__pycache__/
