@@ -17,6 +17,14 @@ You may read more [here][LINK2].
 $ git clone git@github.com:michalspano/white-noise.git && cd white-noise
 ```
 
+## Dependencies
+_Manual run_ requires a local copy of the [__Golang Binaries__][golang] (with proper set-up).
+
+### `PNG` Parser Dependencies
+
+1. `Python >= 3.6`
+2. [`pip`][PIP] & [`pypng`][PYPNG]
+
 ## Execute
 A compiled binary is available for `Linux` and `MacOS` systems.
 ```bash
@@ -52,13 +60,19 @@ $ ./wnoise <width> <height>
 ### Custom use
 Used to specify a custom output path with a custom name of the output file.
 ```bash
-$ ./wnoise <width> <height> -d <output_path>
+$ ./wnoise <width> <height> -d <output_path> -png
 ```
 
 ### Help flag
 See additional help.
 ```bash
 $ ./wnoise <width> <height> -h
+```
+
+### Png flag
+Now, you can convert a generated `.pgm` file to a `.png` file. Just use the `-png` prefix at the end. Check [__Dependencies__](##Dependencies) for correct set-up.
+```bash
+$ ./wnoise <width> <height> ... -png
 ```
 
 ## Demo
@@ -68,3 +82,6 @@ $ ./wnoise <width> <height> -h
 [LINK2]: https://en.wikipedia.org/wiki/Netpbm
 [DOWNLOAD]: https://github.com/michalspano/white-noise/archive/refs/heads/main.zip
 [DEMO]: docs/demo.gif
+[golang]: https://golang.org/dl/
+[PIP]: https://pip.pypa.io/en/stable/
+[PYPNG]: https://pypi.org/project/pypng/
