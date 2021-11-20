@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
 
 const (
 	// Number of command-line arguments
-	maxArgumentCount int = 4
+	maxArgumentCount int = 5
 	// Gray scale limit
 	maxGrayScale int = 15
 	// ANSI escape colors
@@ -26,6 +27,8 @@ const (
 	HEADER string = "P2\n"
 	// EXTENSION - default file extension
 	EXTENSION string = "pgm"
+	// Default script path
+	scriptPath string = "./png-parse/bin/png-parse.pyc"
 )
 
 // Global path to output file (mutable)
@@ -33,52 +36,81 @@ var defaultOutPath = "out/out.pgm"
 
 // Main function
 func main() {
+	// Initial status message
 	cliStatus("White Noise Generator Initialised!")
-	args := getArgs()
 
-	// Check if the number of arguments is valid
-	// Size: <2;4>
-	if len(args) > maxArgumentCount || len(args) < maxArgumentCount - 2 {
+	// Receive passed command-line arguments
+	args := func () []string {
+		return os.Args[1:]
+	}()
+
+	// Default value to convert to PNG -> false
+	var toConvertToPng = false
+
+	// Store number of command-line arguments
+	argc := len(args)
+
+	// Default case
+	if argc < 2 || argc > maxArgumentCount {
 		warnUsage("usage")
-    }
-	// Detect size 4 -> `-d` flag, to change default output path
-	if len(args) == maxArgumentCount {
-		// Detect if any of the arguments is '-d'
-		for i := range args {
-			if args[i] == "-d" {
-				newPath := args[i + 1]
-				if checkFileExtension(newPath) {
-					updatePath(args[i + 1])
-				} else {
-					warnUsage("extension")
-				}
-				break
-			}
-		}
-	}
-	// Detect 3 command-line arguments
-	if len(args) == maxArgumentCount - 1 {
-		// Detect `-h` flag
-		if args[len(args) - 1] == "-h" {
+    } else if argc == 3 {
+		// Width, height, single flag
+		flag := args[len(args) - 1]
+		// Help flag
+		if flag == "-h" {
 			warnUsage("help")
+			// Png converter flag
+		} else if flag == "-png" {
+			toConvertToPng = true
 		} else {
 			warnUsage("flag")
 		}
-	}
-
+	} else if argc == 4 {
+		checkRelocateFlags(args, EXTENSION)
+	// Max number of command line arguments
+	} else if argc == maxArgumentCount {
+        checkRelocateFlags(args, "png")
+		for i := range args {
+			if args[i] == "-png" {
+				// Convert to png
+				toConvertToPng = true
+				break
+			}
+		}
+    }
 	// Write corresponding headers and generate scene
 	width, height := outputParameters(args)
 	writeHeader(width, height)
 	generateWhiteNoise(width, height)
+
+	// Convert to PNG (if required)
+	if toConvertToPng {
+		pngOutPath := func () string {
+			return strings.Replace(defaultOutPath, EXTENSION, "png", 1)
+		}()
+        convertToPng(defaultOutPath, pngOutPath)
+    }
 
 	// End status
 	cliStatus("Generating white noise...done!")
 	os.Exit(0)
 }
 
-// Get command line arguments
-func getArgs() []string {
-    return os.Args[1:]
+// Function to check command-line flags
+func checkRelocateFlags(args []string, ext string) {
+    // Check flags
+    for i := range args {
+		if args[i] == "-d" {
+            newPath := args[i + 1]
+            if checkFileExtension(newPath, ext) {
+                updatePath(newPath)
+				return
+            } else {
+				warnUsage("extension")
+			}
+		}
+    }
+	warnUsage("flag")
 }
 
 // Ensure correct usage
@@ -93,13 +125,15 @@ func warnUsage(key string) {
 	} else if key == "size" {
 		ERR = "Image size must be greater than 0."
 	} else if key == "extension" {
-		ERR = "File extension must be `.pgm`."
+		ERR = "Invalid file extension."
 	} else if key == "help" {
 		fmt.Printf("%sDefault usage: ./wnoise <width> <height>\n" +
-			"Optional usage: ./wnoise <width> <height> | `-d` <output_path>\n" +
+			"Optional usage: ./wnoise <width> <height> | `-d` <output_path> | -png\n" +
 			"- to change default output directory `out/out.pgm`%s\n", YELLOW, RESET)
 	} else if key == "flag" {
 		ERR = "Unsupported flag"
+	} else if key == "script" {
+		ERR = "Script error detected."
 	}
 	fmt.Printf("%s%s%s\n", RED, ERR, RESET)
 	os.Exit(1)
@@ -199,13 +233,18 @@ func generateWhiteNoise(width int, height int) {
 }
 
 // Create a function to update defaultOutPath
-func updatePath(newPath string) {
+func updatePath(generatedPath string) {
 	cliStatus("Updating default output path")
-	defaultOutPath = newPath
+	// Ensure that defaultOutPath has file extension .pgm
+	// We need to generate a file with .pgm extension to feed it into a .png converter
+	generatedPath = func () string {
+		return strings.Replace(generatedPath, "png", EXTENSION, 1)
+	}()
+	defaultOutPath = generatedPath
 }
 
 // Check correct file extension
-func checkFileExtension(newPath string) bool {
+func checkFileExtension(newPath string, extension string) bool {
     // Split the path
     fullSplitPath := strings.Split(newPath, "/")
     // Get the last element
@@ -216,10 +255,27 @@ func checkFileExtension(newPath string) bool {
     lastElement = splitLastElement[len(splitLastElement)-1]
 
     // Check if the last element is .pgm
-    if lastElement == EXTENSION {
+    if lastElement == extension {
         return true
     }
     return false
+}
+
+// Function to transform .pgm to .png
+// Using a prebuild `Python3` script
+// Python Pip dependency: pypng
+func convertToPng(inputPath string, outputPath string) {
+	cliStatus("Converting to png...")
+	// Execute the script to convert .pgm to .png and handle error
+	arguments := []string{inputPath, outputPath}
+	cmd := exec.Command("python3", scriptPath, arguments[0], arguments[1])
+	// RTun script and handle error
+	stdout, err := cmd.Output()
+	if err != nil {
+		warnUsage("script")
+	}
+	// Handle script STDOUT
+	fmt.Println(string(stdout))
 }
 
 // Custom CLI status formatted message
