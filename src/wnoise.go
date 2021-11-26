@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -220,7 +221,8 @@ func generateWhiteNoise(width int, height int) {
 	// White noise height x width
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
-			randomGrayScale := rand.Intn(maxGrayScale)
+			// Generate randomGrayScale value
+			randomGrayScale := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(maxGrayScale)
 			// Handle file writing error
 			_, Err := file.WriteString(strconv.Itoa(randomGrayScale) + " ")
 			if Err != nil {
