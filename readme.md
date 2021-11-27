@@ -82,7 +82,12 @@ $ ./wnoise <width> <height> ... -png
 ```
 
 ### `GIF` Parser
+
 You can even convert generated sequence of `.png` files to a `.gif` file with a predefined
+
+### Example
+
+![gif-demo][GIF]
 
 `shell` command.
 ```bash
@@ -131,3 +136,4 @@ __Develop__ branch with beta features: [link][develop] (__warning__: might inclu
 [PIP]: https://pip.pypa.io/en/stable/
 [PYPNG]: https://pypi.org/project/pypng/
 [PIL]: https://pypi.org/project/Pillow/
+[GIF]: docs/out.gif
