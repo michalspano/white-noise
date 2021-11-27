@@ -66,7 +66,12 @@ def read_json(PATH: str) -> dict:
 
     # Return json data in a dictionary
     with open(PATH, 'r') as f:
-        return json.load(f)
+        # Handle JSON decoding errors
+        try:
+            data: dict = json.load(f)
+        except json.decoder.JSONDecodeError:
+            abort(f'{Colors.RED}JSON file `{PATH}` is invalid.{Colors.RESET}')
+    return data
 
 
 # Log function
