@@ -23,12 +23,12 @@ _Manual run_ requires a local copy of the [__Golang Binaries__][golang] (with pr
 ### `PNG` Parser Dependencies
 
 1. `Python >= 3.6`
-2. [`pip`][PIP] & [`pypng`][PYPNG] - __(optional, _`png` support_)__
+2. [`pip`][PIP] & [`pypng`][PYPNG] 
 
 ### `GIF` Parser Dependencies
 
 1. `Python >= 3.6`
-2. [`PIL`][PIL] - __(optional, _`gif` support_)__
+2. [`pip`][PIP] & [`PIL`][PIL] 
 
 ## Execute
 __Note__: all command are executed from the __root__ of the repository.
