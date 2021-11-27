@@ -34,11 +34,13 @@ function move_pngs {
 	if [ "$last_part" == "$main_dir" ]; then
 		printf "${GREEN}Moving all PNGs to ${ITALICS}${out}${RESET}\n"
 		sleep 0.5
-		if [ -f *.png ]; then
+		# Check if any files are of type `PNG`
+		if [ "$(ls -1 *.png 2>/dev/null)" ]; then
+			# Move all `PNGs` to `out`
 			mv *.png "$out"
+			printf "${GREEN}All PNGs moved to ${ITALICS}${out}${RESET}\n"
 		else
-			printf "${RED}No PNG files found in the current directory.${RESET}\n"
-			exit 1 
+			printf "${RED}No PNGs found in ${ITALICS}${current_dir}${RESET}\n"
 		fi
 	else
 		printf "${RED}Make sure that you are in the ${ITALICS}$main_dir${RESET} ${RED}directory, in order to move any PNGs.${RESET}\n"
