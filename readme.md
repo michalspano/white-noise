@@ -23,9 +23,15 @@ _Manual run_ requires a local copy of the [__Golang Binaries__][golang] (with pr
 ### `PNG` Parser Dependencies
 
 1. `Python >= 3.6`
-2. [`pip`][PIP] & [`pypng`][PYPNG]
+2. [`pip`][PIP] & [`pypng`][PYPNG] 
+
+### `GIF` Parser Dependencies
+
+1. `Python >= 3.6`
+2. [`pip`][PIP] & [`PIL`][PIL] 
 
 ## Execute
+__Note__: all command are executed from the __root__ of the repository.
 A compiled binary is available for `Linux` and `MacOS` systems.
 ```bash
 $ .bin/wnoise <...>
@@ -75,6 +81,40 @@ Now, you can convert a generated `.pgm` file to a `.png` file. Just use the `-pn
 $ ./wnoise <width> <height> ... -png
 ```
 
+### `GIF` Parser
+You can even convert generated sequence of `.png` files to a `.gif` file with a predefined
+
+`shell` command.
+```bash
+$ bash ./gif-parse/parse.sh <gif-stash_path> <output_path.png>
+```
+
+### Default `GIF` attributes
+A `.json` file containing the default `GIF` attributes is available in the `gif-parse` folder.
+You can change the `gif-duration` and `gif-loop-count` (_0_ indicates __infinite__ loop).
+
+__Default values__:
+```json
+{
+  "gif-preferences": {
+    "duration": 200,
+    "loop": 0
+  }
+}
+```
+
+#### Subcommands
+Move all `.png` files to the __Gif-stash__ folder.
+
+```bash
+$ bash ./gif-parse/dump_png.sh
+```
+
+Reset contents of the __Gif-stash__ folder.
+```bash
+$ bash ./gif-parse/reset_stash.sh
+```
+
 ## Demo
 ![live_demo][DEMO]
 
@@ -90,3 +130,4 @@ __Develop__ branch with beta features: [link][develop] (__warning__: might inclu
 [golang]: https://golang.org/dl/
 [PIP]: https://pip.pypa.io/en/stable/
 [PYPNG]: https://pypi.org/project/pypng/
+[PIL]: https://pypi.org/project/Pillow/
