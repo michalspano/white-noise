@@ -1,0 +1,11 @@
+title: White Noise Generator
+description: A simple CLI applet to generate White Noise pictorial representations. Now with PNG & GIF support.
+remote_theme: pmarsceill/just-the-docs
+
+aux_links:
+  "White Noise on GitHub":
+  - "https://github.com/michalspano/white-noise"
+  
+# TODO: add missing config.
+  
+color_scheme: "dark"
